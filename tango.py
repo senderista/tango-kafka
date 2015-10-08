@@ -1,6 +1,3 @@
-import sys
-from time import sleep
-import uuid
 from collections import MutableMapping
 import capnp
 import tango_capnp
@@ -21,18 +18,12 @@ class TangoRuntime(object):
         # catch up to tail of log and apply all pending updates
         try:
             for message in self.consumer:
-                # message value is raw byte string -- decode if necessary!
-                # e.g., for unicode: `message.value.decode('utf-8')`
                 obj.apply(message.value)
-                print("%s:%d:%d: key=%s value=%s" % (message.topic, message.partition,
-                                                     message.offset, message.key,
-                                                     message.value))
         except ConsumerTimeout:
             pass
 
     def update_helper(self, data):
         response = self.producer.send_messages(bytes(self.topic), bytes(data))[0]
-        print "topic: %s\npartition: %s\nerror: %s\noffset: %s" % (response.topic, response.partition, response.error, response.offset)
 
 class TangoMap(MutableMapping):
     def __init__(self, runtime):
